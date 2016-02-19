@@ -1,0 +1,135 @@
+﻿@{
+    ViewBag.Title = "Year";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Year</h2>
+<script src="~/Scripts/highchart/highcharts.js"></script>
+    <script src="~/Scripts/highchart/modules/exporting.js"></script>
+<script src="~/Scripts/ChartExpend.js"></script>
+
+<body>
+    @Html.Label("请选择图标：")
+    @Html.DropDownList("ddlChartType", new List<SelectListItem>() {
+     new SelectListItem() { Text = "饼图型", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.饼图型).ToString(), Selected=true },
+        new SelectListItem() { Text = "混合型", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.混合型).ToString() },
+        new SelectListItem() { Text = "柱状图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.柱状图).ToString() },
+        new SelectListItem() { Text = "多柱状图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.多柱状图).ToString() },
+        new SelectListItem() { Text = "多流线图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.多流线图).ToString() },
+        new SelectListItem() { Text = "多横柱图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.多横柱图).ToString() },
+        new SelectListItem() { Text = "层叠图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.层叠图).ToString() },
+        new SelectListItem() { Text = "区域图", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.区域图).ToString() },
+        new SelectListItem() { Text = "温度计型", Value=((int)MyBank.Common.PublicEnum.HighchartTypeEnum.温度计型).ToString() },
+}, null, new { @onchange = "chartChangeEvent()" })
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+</body>
+
+<script type="text/javascript">
+    $(function () {
+        getChartSource();
+    });
+    var dc, chartTypeArr = ["pie", "combine", "column", "spline", "bar", "stack", "areaspline", "bubble", "scatter"];
+    var getChartSource = function () {
+        var type = "column";
+     
+        $.ajax({
+            url: "/MyBank/GetExpenditureByYear",
+            type: "post",
+            data: { filterValue: 1 },
+            dataType: "json",
+            success: function (data) {
+                var chartSource = data;
+                dc = new $.fn.jDataChart({
+                    renderTo: $("#container"),
+                    //需要展示的位置（哪个DOM元素内）   
+                    chartType: type,
+                    //图标类型：bar,line,spline,column,pie,area,areaspline,combine,bubble,scatter
+                    title: "年度消费总额",
+                    //图标大标题
+                    subtitle: "报告详情",
+                    //图标小标题
+                    xAxisName: "时间轴",
+                    //X轴名称
+                    xAxisColumn: "Year",
+                    //维度列-需要将数据集中的那一列当成维度展现（例如时间，网站，频道等）,相当于yAxisColumn中每个Y轴的Key
+                    yAxisSetting: [{ key: "花费（￥）", oppositeOption: false }],
+                    //Y轴设置，可添加多条Y轴， key-Y轴名称，oppositeOption-true/false（true为right, false为left）
+                   yAxisColumn: [{ key: "Money", chartType: "column", yIndex: 0 }],
+                    //指标列-需要将数据集中的那几列当成指标来展示（例如Impressiosn,Clicks,UV,CTR等）
+                    //key-指标列明，chartType-图形类型，yIndex-每个指标集需要对应的具体Y轴索引
+                    dataSource: chartSource,
+                    //图标数据源，是一个JSON的LIST对象，常用的一张二维表数据例如List<TModel>
+                    click: function (x, y, category) {
+                        alert("x值：" + x + " y值：" + y + " category：" + category);
+                    }
+                });
+
+                dc.create();
+                //Y轴设置可以添加多个Y轴，标准格式：[{key: keyVal, oppositeOption:true/false（true为right, false为left） }]
+                //                        yAxisSetting: [{ key: "Impressions&Clicks&UV", oppositeOption: false }, { key: "CTR", oppositeOption: true}],
+
+                //指标列添加标准格式为[{key: keyVal, chartType: chartTypeVal, yIndex: yIndexVal }];
+                //                        yAxisColumn: [{ key: "Impressions", chartType: "column", yIndex: 0 }, { key: "Clicks", chartType: "column", yIndex: 0 }, { key: "UV", chartType: "column", yIndex: 0 }, { key: "CTR", chartType: "spline", yIndex: 1}],
+
+                //饼图格式
+                //                        yAxisSetting: [{ key: "", oppositeOption: false}],
+                //                        yAxisColumn: [{ key: "Impressions", chartType: null, yIndex: null }, { key: "Clicks", chartType: null, yIndex: null }, { key: "UV", chartType: null, yIndex: null}],
+
+                //常见多Series设置
+                //                        yAxisSetting: [{ key: "Clicks", oppositeOption: false}];
+                //                        yAxisColumn: [{ key: "Clicks", chartType: null, yIndex: null}];
+
+                //                        yAxisSetting: [{ key: "", oppositeOption: false}],
+                //                        yAxisColumn: [{ key: "Impressions", chartType: null, yIndex: null }, { key: "Clicks", chartType: null, yIndex: null }, { key: "UV", chartType: null, yIndex: null}],
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown);
+            }
+        });
+    }
+    var chartChangeEvent = function () {
+
+        var dcOption = dc.getChartOptions();
+        var type = chartTypeArr[parseInt($("#ddlChartType").val()) - 1].toString();
+        setChangeChartOptions(dcOption, type);
+        dc.refresh();
+    }
+    var setChangeChartOptions = function (dcOption, type) {
+        switch (type) {
+            case "combine":
+                {
+                    dcOption.chartType = type;
+                    dcOption.xAxisName = dcOption.xAxisName;
+                    dcOption.yAxisSetting = [{ key: "花费($)", oppositeOption: false }];
+                    dcOption.yAxisColumn = [{ key: "Money", chartType: "column", yIndex: 0 }];
+                }; break;
+            case "pie":
+                {
+                    dcOption.chartType = type;
+                    dcOption.xAxisName = "";
+                    dcOption.yAxisSetting = [{ key: "", oppositeOption: false }];
+                    dcOption.yAxisColumn = [{ key: "Money", chartType: null, yIndex: null }];
+                }; break;
+            case "bubble":
+                {
+                    dcOption.chartType = type;
+                    dcOption.xAxisName = "Impressions";
+                    dcOption.yAxisSetting = [{ key: "花费", oppositeOption: false }];
+                    dcOption.yAxisColumn = [{ key: "Money", chartType: null, yIndex: null }];
+                }; break;
+            case "scatter":
+                {
+                    dcOption.chartType = type;
+                    dcOption.xAxisName = "Year";
+                    dcOption.yAxisSetting = [{ key: "花费", oppositeOption: false }];
+                    dcOption.yAxisColumn = [{ key: "Money", chartType: null, yIndex: null }];
+                }; break;
+            default:
+                {
+                    dcOption.chartType = type;
+                    dcOption.yAxisSetting = [{ key: "花费", oppositeOption: false }];
+                    dcOption.yAxisColumn = [{ key: "Money", chartType: null, yIndex: null }];
+                }; break;
+        }
+    }
+</script>

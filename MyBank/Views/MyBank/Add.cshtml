@@ -1,0 +1,163 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Add</title>
+    <link href="~/Content/assets/css/ace.min.css" rel="stylesheet" />
+    <link href="~/Content/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Scripts/easyui/themes/bootstrap/easyui.css" rel="stylesheet" />
+    <link href="/Scripts/easyui/themes/icon.css" rel="stylesheet" />
+    <link href="/Scripts/dialog/css/ui-dialog.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.8.2.min.js"></script>
+    <script src="/Scripts/easyui/jquery.easyui.min.js"></script> 
+    <script src="/Scripts/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script src="/Scripts/dialog/dist/dialog-plus-min.js"></script>
+    <script src="~/Scripts/Common.js"></script>
+    <style>
+        table tr {
+            /*height: 25px;*/
+            line-height: 30px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            //日历
+            $("#txtOccurTime").datebox({
+                required: true,
+                missingMessage: "必填项",
+                //disabled:true,
+                //            formatter: function (date) { return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate(); },
+                //            parser: function(date){ return new Date(Date.parse(date.replace(/-/g,"/"))); },
+
+                onSelect: function (date) {
+                    $("#txtOccurTime").val(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                }
+            });
+        })
+        //保存
+        function Add()
+        {
+            $.ajax({
+                cache: true,
+                type: "POST",
+                url: '/MyBank/Add',
+                data: $('#form1').serialize(),// 你的formid
+                async: false,
+                beforeSend: function (request) {
+                    $("#_btnSubmit").attr({ "disabled": "disabled" });  //按钮置灰
+                },
+                error: function (request) {
+                    $("#_btnSubmit").removeAttr("disabled");
+                    showError("提示", "出现异常，请稍后再试！", false, false);
+                },
+                success: function (data) {
+                    $("#_btnSubmit").removeAttr("disabled");
+                    var result = eval('(' + data + ')');
+                    if (result.Code == "ok") {
+                        showSucceed("提示", result.Message, false, true);
+                        window.parent.loadData();
+                    }
+                    else {
+                        showError("提示", result.Message, false, false);
+                    }
+                }
+            });          
+        }
+        //根据收入支出得到相应事项
+        function GetItem() {
+            var typeID = $("#ddlType").val();
+            $.ajax({
+                type: "post",
+                url: "/MyBank/GetItem",
+                data: 'typeID=' + typeID,
+                dataType: "json",
+                async: false, //同步
+                success: function (data) {
+                    $("#ddlItem").html("<option value='0'>--请选择--</option>");
+                    var count = 0;
+                    var itemID = 0;
+                    $.each(data, function (i, itemValue) {
+                        count++;
+                        itemID = itemValue.ID;
+                        $("#ddlItem").append("<option value = '" + itemValue.ID + "'>" + itemValue.Item + "</option>");
+                        //$("<option><option>").val(itemValue.ID).html(itemValue.CPLXMC)     
+                    })
+                },
+                error: function () {
+                    $("#ddlItem").html("<option value='0'>--请选择--</option>");
+                    alert("error");
+                }
+            })
+        }
+        // 关闭
+        function CloseDialog(){
+            Close();
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" class="registerform" method="post">
+        <div style="margin: 20px auto auto 20px;">
+            <table cellpadding="5" cellspacing="0">
+                <tr>
+                    <td align="right">
+                        <span style="color: Red">*</span>类型：
+                    </td>
+                    <td align="left">
+                        <select id="ddlType" name="Type" onchange="GetItem();" style="width:100px">
+                            <option value="2">支出</option>
+                            <option value="1">收入</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <span style="color:Red">*</span>时间：
+                    </td>
+                    <td align="left">
+                        @Html.TextBox("OccurTime", "", new { id = "txtOccurTime" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <span style="color: Red">*</span>事项：
+                    </td>
+                    <td align="left">
+                        @Html.DropDownList("ItemID", (SelectList)ViewData["FundDic"], "--请选择--", new { id = "ddlItem", style = "width:100px" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <span style="color: Red">*</span>金额：
+                    </td>
+                    <td align="left">
+                        @Html.TextBox("Money", "", new { id = "txtMoney" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <span style="color: Red">*</span>备注：
+                    </td>
+                    <td align="left">
+                        @Html.TextArea("Remark", "", 3, 30, new { @id = "txtRemark", maxlength = "100", onKeyDown = "if (this.value.length > 100) this.value = this.value.substr(0,100)", onKeyUp = "if (this.value.length > 100) this.value = this.value.substr(0,100)" })
+                        <span style="color: Red">100字</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="height: 20px"></td>
+                </tr>
+                <tr>
+                    <td colspan="6" align="center">
+                        <a href="#" id="_btnSubmit" onclick="Add();" class="btn btn-info">保存</a>&nbsp;&nbsp;<a href="#" id="_btnSubmit" onclick="CloseDialog();" class="btn btn-info">关闭</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</body>
+</html>

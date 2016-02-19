@@ -1,0 +1,122 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <link href="css/bootstrap-combined.min.css" rel="stylesheet" />
+    <link href="css/layoutit.css" rel="stylesheet" />
+    <script src="/Scripts/jquery-1.8.2.min.js"></script>
+    <script src="/Scripts/highchart/highcharts.js"></script>
+    <script src="/Scripts/highchart/modules/exporting.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script>
+        //左侧Javascript代码
+    </script>
+</head>
+<body>
+    <div id="container" style="min-width:700px;height:400px"></div>
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="tabbable" id="tabs-224996">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#panel-474718" data-toggle="tab">第一部分</a>
+                        </li>
+                        <li>
+                            <a href="#panel-551612" data-toggle="tab">第二部分</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="panel-474718">
+                            <p>
+                                第一部分内容.
+                            </p>
+                        </div>
+                        <div class="tab-pane" id="panel-551612">
+                            <p>
+                                第二部分内容.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    $(function () {
+        $('#container').highcharts({
+            chart: {
+                type: 'column',
+                margin: [50, 50, 100, 80]
+            },
+            title: {
+                text: 'Worlds largest cities per 2008'
+            },
+            xAxis: {
+                categories: [
+                    'Tokyo',
+                    'Jakarta',
+                    'New York',
+                    'Seoul',
+                    'Manila',
+                    'Mumbai',
+                    'Sao Paulo',
+                    'Mexico City',
+                    'Dehli',
+                    'Osaka',
+                    'Cairo',
+                    'Kolkata',
+                    'Los Angeles',
+                    'Shanghai',
+                    'Moscow',
+                    'Beijing',
+                    'Buenos Aires',
+                    'Guangzhou',
+                    'Shenzhen',
+                    'Istanbul'
+                ],
+                labels: {
+                    rotation: -45,
+                    align: 'right',
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Population (millions)'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                pointFormat: 'Population in 2008: <b>{point.y:.1f} millions</b>',
+            },
+            series: [{
+                name: 'Population',
+                data: [34.4, 21.8, 20.1, 20, 19.6, 19.5, 19.1, 18.4, 18,
+                    17.3, 16.8, 15, 14.7, 14.5, 13.3, 12.8, 12.4, 11.8,
+                    11.7, 11.2],
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#000000',
+                    align: 'right',
+                    x: 4,
+                    y: -10,
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif',
+                        textShadow: '0 0 3px black'
+                    }
+                }
+            }]
+        });
+    });
+</script>

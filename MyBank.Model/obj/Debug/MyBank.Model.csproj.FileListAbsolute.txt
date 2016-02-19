@@ -1,0 +1,9 @@
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\MyBank.Model.dll.config
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\MyBank.Model.dll
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\MyBank.Model.pdb
+E:\MVC\我的银行\MyBank\MyBank.Model\obj\Debug\MyBank.Model.dll
+E:\MVC\我的银行\MyBank\MyBank.Model\obj\Debug\MyBank.Model.pdb
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\EntityFramework.dll
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\EntityFramework.xml
+E:\MVC\我的银行\MyBank\MyBank.Model\bin\Debug\zh-Hans\EntityFramework.resources.dll
+E:\MVC\我的银行\MyBank\MyBank.Model\obj\Debug\MyBank.Model.csprojResolveAssemblyReference.cache

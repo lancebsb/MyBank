@@ -1,0 +1,157 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+
+    <script src="~/Scripts/highchart/highcharts.js"></script>
+    <script src="~/Scripts/highchart/modules/exporting.js"></script>
+</head>
+<body>
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+</body>
+</html>
+<script type="text/javascript">
+    var data = [];
+    var xdata=[];
+    var categories = new Array();
+    var datas = new Array();
+    //图表属性，不包含数据
+    var options = {
+        credits:  //HighCharts如何去除图表右下角的highcharts.com链接
+                {
+                    enabled: true,
+                    href: "http://www.52wulian.org",
+                    text: "浏览总量：291，IP总数：74  – 我爱物联网"
+                },
+            chart: {
+                renderTo: 'container', //要显示柱状图的div的id
+                type: 'line',       //图表类型为柱状图
+                margin: 75,
+                options3d: {           //这里设置3D图表的样式
+                    enabled: true,
+                    alpha: 10,
+                    beta: 0,
+                    depth: 50,
+                    viewDistance: 25
+                }
+            },
+        title: {
+            text: 'My first Highcharts chart',     //指定图表标题
+            align: 'center'
+        },
+            tooltip: {    //提示格式
+                shared: true,
+                useHTML: true,
+                headerFormat: '<small>{point.key}</small><table>',
+                pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
+                    '<td style="text-align: right"><b>{point.y} 元</b></td></tr>',
+                footerFormat: '</table>',
+                valueDecimals: 2
+            },
+        subtitle: {
+            useHTML: true,
+            text: "Highcharts中文网 | <a href='http://www.hcharts.cn' target='_blank'>中文教程</a>"
+        },
+
+        xAxis: {
+          
+        },
+        yAxis: {
+            title: {
+                text: '单位：元'                  //指定y轴的标题
+            }
+        },
+
+        series: [
+        ],
+    };
+    $(function () {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            data: { "year": "2015" },  //参数列表
+            async: false,
+            url: "/MyBank/GetExpenditureByMonth",
+            success: function (result) {
+                var jsonData = result;
+                var mySeries = new Array(jsonData.length);
+                for (var i = 0; i < jsonData.length; i++) {
+                    datas[i]=new Array();
+                    for (var j = 0; j < jsonData[i].Data.length; j++) {
+                        datas[i].push(jsonData[i].Data[j].Money);
+                    }
+                    //data[i] = jsonData[i].Money;   //data是后台传向前台的参数，代表显示数据，本实例显示的是年用水量
+                    //xdata[i] = jsonData[i].Month;
+                    //options.series[i].name = jsonData[i][0].Year;
+                    //options.series[i].data = datas[i];
+                    mySeries[i]={ "name": jsonData[i].Year,data:datas[i] };
+                }
+                options.series = mySeries;
+                options.xAxis.categories = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                var chart = new Highcharts.Chart(options);
+
+                 // [1,2,3,4,5,6,7,8,9,10,11,12]; //xdata是后台传向前台的参数，代表横轴的数组
+                
+                //var tiltleTm = "Title"; //tiltleTm 是后台传向前台的参数，代表图标的标题
+                //var chart = new Highcharts.Chart({
+                //    chart: {
+                //        renderTo: 'container', //要显示柱状图的div的id
+                //        type: 'line',       //图表类型为柱状图
+                //        margin: 75,
+                //        options3d: {           //这里设置3D图表的样式
+                //            enabled: true,
+                //            alpha: 10,
+                //            beta: 0,
+                //            depth: 50,
+                //            viewDistance: 25
+                //        }
+                //    },
+
+                //    title: {
+                //        text: tiltleTm    //显示柱状图的标题
+                //    },
+                //    credits: {//不显示highchart超链接
+                //        enabled: false
+                //    },
+                //    plotOptions: {
+                //        column: {
+                //            depth: 10,
+                //            value: 0,
+                //            width: 1
+                //        }
+                //    },
+                //    yAxis: {    //纵坐标
+                //        title: {
+                //            text: '单位：元'
+                //        }
+                //    },
+                //    xAxis: {   //横坐标
+                //        categories: xdata
+                //    },
+                //    tooltip: {    //提示格式
+                //        shared: true,
+                //        useHTML: true,
+                //        headerFormat: '<small>{point.key}</small><table>',
+                //        pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
+                //            '<td style="text-align: right"><b>{point.y} 元</b></td></tr>',
+                //        footerFormat: '</table>',
+                //        valueDecimals: 2
+                //    },
+                //    series: [{
+                //        name: '支出',
+                //        data: [10, 20, 30, 84, 96, 55, 44, 100, 500, 200, 150, 50]
+                //    }]
+                //});
+            },
+            error: function () {
+                alert('获取失败!');
+            }
+        });
+    });
+</script>

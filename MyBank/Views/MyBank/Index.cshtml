@@ -1,0 +1,277 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="/Scripts/easyui/themes/bootstrap/easyui.css" rel="stylesheet" />
+    <link href="/Scripts/easyui/themes/icon.css" rel="stylesheet" />
+    <link href="/Scripts/dialog/css/ui-dialog.css" rel="stylesheet" />
+    <script src="/Scripts/easyui/jquery.easyui.min.js"></script>
+    <script src="/Scripts/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script src="/Scripts/dialog/dist/dialog-plus-min.js"></script>
+    <script src="~/Scripts/Common.js"></script>
+    <style type="text/css">
+        .datagrid-btable tr {
+            height: 45px; /*修改你要的行高;*/
+        }
+        .datagrid-cell {
+            font-size:14px;
+        }
+    </style>
+    <script type="text/javascript">
+        //重置查询条件Panel大小
+        function windowResize1(col) {
+            var width = $(window).width();
+            var height = $(window).height();
+            $("#" + col).width(width);
+            $('#' + col).panel();
+        }
+
+        //datagrid窗口自适应
+        function windowResize2(layout, panel) {
+            var width = $(window).width();
+            var height = $(window).height();
+            $('#' + layout).height(height - 120);
+            $('#' + layout).layout();
+            $('#' + panel).panel();
+        }
+        $(function () {
+            windowResize1("searchPanel");  //文档载入时加载
+            windowResize2('listLayout', "listPanel");
+            $(window).resize(function () {
+                windowResize2('listLayout', 'listPanel');
+                windowResize1("searchPanel");  //窗口改变大小时加载
+            });
+            //日历
+            $("#txtBeginTime").datebox({
+                onSelect: function (date) {
+                    $("#txtBeginTime").val(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                }
+            });
+            // 列表
+            $("#tt").datagrid({
+                url: "/MyBank/GetStatement",
+                type: "post",
+                dataType: 'json',
+                title: "",
+                rownumbers: true,
+                pageSize: 15,//每页显示的记录条数，默认为10
+                //pageList: [1, 5, 10, 15],//可以设置每页记录条数的列表
+                pagination: true,
+                pageNumber: 1,//pager,
+                //nowrap: false,
+                //striped: true,
+                fit: true,
+                showFooter: true,
+                checkOnSelect: false,
+                //rowStyler: function(index,row){
+                //    //return 'background-color:#6293BB;color:#fff;';
+                //    return 'background-color:#6293BB;height: 50px;;font-weight:bold;font-size:50';
+                //},
+                onClickRow: function (rowIndex, rowData) {
+                    $(this).datagrid('unselectRow', rowIndex);
+                }
+            })
+
+            //设置分页控件
+            var p = $('#tt').datagrid('getPager');
+            p.pagination({
+                layout: ['list', 'first', 'prev', 'next', 'last', 'sep', 'links', 'sep', 'manual', 'refresh'],
+                beforePageText: '转到',
+                afterPageText: ''
+            });
+            // 隐藏全选按钮
+            //$(".datagrid-header-check").children().css("display", "none");
+        });
+        // 刷新列表
+        loadData = function () {
+            $("#tt").datagrid("reload");
+        }
+        // 添加页面
+        function Add() {
+            var src = "Add?rnd=" + new Date().getTime();
+
+            $("#if1").attr("src", src);
+            $("#dd").window({
+                title: "添加",
+                width: 480,
+                height: 400,
+                top: ($(window).height() - 400) * 0.5,
+                left: ($(window).width() - 480) * 0.5
+            }).window("open");
+        }
+        // 查询
+        function QueryList() {            
+            $("#tt").datagrid('load', {
+                typeID: $("#ddlType").val(),
+                itemID: $("#ddlItem").val(),
+                userName: $("#txtUserName").val(),
+                beginTime: $("input[name='BeginTime']").val(),
+                endTime: $("input[name='EndTime']").val()
+            });
+        }
+        // 添加“操作”列的链接文字（编辑）
+        function Operate(val, row) {
+            var id = row.ID;
+            if (id == undefined)
+                return "";
+            var link = "<a href='#' onclick='Edit(" + id + ")' class='easyui-linkbutton' data-options='plain:true,iconCls:'icon-back''>编辑</a>" +
+                   "&nbsp;&nbsp;&nbsp;&nbsp;<a style='text-decoration:none' href='javascript:void(0)' onclick=\"Delete('" + id + "')\" class='easyui-linkbutton' data-options='plain:true,iconCls:'icon-back''>删除</a>";
+            return link;
+        }
+        //根据收入支出得到相应事项
+        function GetItem() {
+            var typeID = $("#ddlType").val();
+            $.ajax({
+                type: "post",
+                url: "/MyBank/GetItem",
+                data: 'typeID=' + typeID,
+                dataType: "json",
+                async: false, //同步
+                success: function (data) {
+                    $("#ddlItem").html("<option value='0'>--请选择--</option>");
+                    var count = 0;
+                    var itemID = 0;
+                    $.each(data, function (i, itemValue) {
+                        count++;
+                        itemID = itemValue.ID;
+                        $("#ddlItem").append("<option value = '" + itemValue.ID + "'>" + itemValue.Item + "</option>");
+                        //$("<option><option>").val(itemValue.ID).html(itemValue.CPLXMC)     
+                    })
+                },
+                error: function () {
+                    $("#ddlItem").html("<option value='0'>--请选择--</option>");
+                    alert("error");
+                }
+            })
+        }
+        ///关闭对话框
+        function closeDialog() {
+            $("#dd").window("close");
+        }
+        //格式化类型
+        function TypeFormatter(value, rowData, rowIndex)
+        {
+            if (value == "2") {
+                return "<span style='color:red'>支出</span>";
+            }
+            else if (value == "1") {
+                return "<span style='color:green'>收入</span>";
+            }
+            else {
+                return "";
+            }
+        }
+        //删除
+        function Delete(id) {
+            showQuestion("提示", "确定要删除该条记录吗?", true, function () {
+                $.ajax({
+                    type: 'POST',
+                    url: '/MyBank/DelStatement',
+                    dataType: 'json',
+                    data: "statementID=" + id,
+                    async: false, //同步
+                    success: function (data) {
+                        if (data.Code == "ok") {  // 刷新列表页
+                            loadData();
+                            showSucceed("提示", data.Message, true, false);
+                        }
+                        else {
+                            showError("错误", data.Message, true, false);
+                        }
+                    },
+                    error: function () {
+                        progressBar.close();
+                        alertError("错误", "修改失败", true, false);
+                    }
+                });
+            }, function () { });
+        }
+        //  编辑页面
+        function Edit(id) {
+            var src = "Edit?statementID="+id+"&rnd=" + new Date().getTime();
+
+            $("#if1").attr("src", src);
+            $("#dd").window({
+                title: "编辑",
+                width: 480,
+                height: 400,
+                top: ($(window).height() - 400) * 0.5,
+                left: ($(window).width() - 480) * 0.5
+            }).window("open");
+        }
+    </script>
+        </head>
+<body style="margin-bottom: 0px; margin-top:0px; padding-top:5px; ">
+    <div id="searchPanel" class="easyui-panel" title="" iconcls="icon-search" style=" padding:10px; margin-bottom:5px">
+        <table>
+            <tr>
+                <td>类型：</td>
+                <td>
+                    <select id="ddlType" name="Type" onchange="GetItem()">
+                        <option value="0">--请选择--</option>
+                        <option value="2">支出</option>
+                        <option value="1">收入</option>
+                    </select>
+                </td>
+                <td>事项：</td>
+                <td>
+                    <select id="ddlItem" name="ItemID" style="width:100px">
+                        <option value="0">--请选择--</option>
+                    </select>
+                        @*@Html.DropDownList("ItemID", (SelectList)ViewData["FundDic"], "--请选择--", new { id = "ddlItem" })*@
+                </td>
+                <td>日期：</td>
+                <td>
+                    @Html.TextBox("BeginTime", "", new { id = "txtBeginTime" })--@Html.TextBox("EndTime", "", new { id = "txtEndTime" ,@class="easyui-datebox"})
+                </td>
+                <td>姓名：</td>
+                <td>
+                    <input type="text" class="easyui-textbox" id="txtUserName" style="height:35px" />
+                </td>
+                <td>
+                    <a href="#" onclick="QueryList();" class="btn btn-success">查询</a>
+                </td>
+                <td>      
+                    <a href="#" onclick="Add();" class="btn btn-info">添加费用</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="listPanel" class="easyui-panel">
+        <div id="listLayout" fit="true" class="easyui-layout">
+            <table id="tt" data-options="
+                fitColumns:true,
+                toolbar:'#tb',
+                striped:true">
+                <thead>
+                    <tr>
+                        <th data-options="field:'ck',checkbox:true,align:'center'"></th>
+                        <th data-options="field:'ID',width:25,align:'center',hidden: true"></th>
+                        <th data-options="field:'ItemName',width:25,align:'center'">事项</th>
+                        <th data-options="field:'Money',width:25,align:'center'">钱数</th>
+                        <th data-options="field:'Type',width:30,formatter:TypeFormatter,align:'center'">类型</th>
+                        <th data-options="field:'OccurTime',width:25,formatter: DateFormatter,align:'center'">费用产生时间</th>
+                        <th data-options="field:'CreateTime',width:30,formatter: TimeFormatter,align:'center'">创建时间</th>
+                        <th data-options="field:'Remark',width:40,align:'center'">备注</th>
+                        <th data-options="field:'Operator',width:25,align:'center'">操作人</th>
+                        <th data-options="field:'IDforDel',width:30,align:'center',formatter:Operate">操作</th>
+                    </tr>
+                </thead>
+            </table>
+            @*<div id="tb" class="datagrid-toolbar" cellspacing="0" cellpadding="0">
+                    <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-edit'" onclick="Edit()" plain:true>编辑</a>         
+                    <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'" onclick="Delete()">删除</a>
+            </div>*@
+        </div>
+    </div>
+    <div id="dd" class="easyui-window" style="width: 360px; height: 550px;" data-options="closed:true,modal:true,minimizable:false,maximizable:false,collapsible:false">
+        <iframe id="if1" frameborder="0" src="" scrolling="no" width="100%" height="98%"></iframe>
+    </div>
+</body>
+</html>
