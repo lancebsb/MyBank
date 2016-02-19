@@ -1,6 +1,7 @@
-/MyBank/bin/
+!/MyBank/bin/
 *.suo
-obj/
+!/obj/
+!/bin
 *.zip
 *.rar
 *.via
