@@ -1,0 +1,8 @@
+/MyBank/bin/
+*.suo
+obj/
+*.zip
+*.rar
+*.via
+*.tmp
+*.err
