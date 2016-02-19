@@ -15,4 +15,3 @@ C:\Users\lance\Documents\GitHub\MyBank\MyBank.Model\bin\Debug\EntityFramework.xm
 C:\Users\lance\Documents\GitHub\MyBank\MyBank.Model\bin\Debug\zh-Hans\EntityFramework.resources.dll
 C:\Users\lance\Documents\GitHub\MyBank\MyBank.Model\obj\Debug\MyBank.Model.dll
 C:\Users\lance\Documents\GitHub\MyBank\MyBank.Model\obj\Debug\MyBank.Model.pdb
-C:\Users\lance\Documents\GitHub\MyBank\MyBank.Model\obj\Debug\MyBank.Model.csprojResolveAssemblyReference.cache

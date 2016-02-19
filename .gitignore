@@ -1,9 +1,11 @@
-!/MyBank/bin/
+/bin/
+/MyBank/bin/
 *.suo
-!/obj/
-!/bin
+/obj/
+/bin
 *.zip
 *.rar
 *.via
 *.tmp
 *.err
+*.dll
